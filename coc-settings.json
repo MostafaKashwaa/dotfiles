@@ -1,0 +1,22 @@
+{
+  "python.venvPath": "${workspaceFolder}",
+  "python.formatting.provider": "autopep8",
+  "python.linting.enabled": true,
+  "coc.preferences.formatOnSave": false,
+
+  "explorer.file.showHiddenFiles": true,
+  "explorer.icon.enableNerdfont": true,
+  "explorer.keyMappings.global": {
+    "h": ["wait", "collapse"],
+    "H": ["wait", "collapse:recursive"],
+    "l": ["wait", "expandable?", "expand", "open"],
+    "L": ["wait", "expand:recursive"],
+    "u": ["wait", "gotoParent"],
+    "U": ["wait", "gotoParent:cursor"],
+    "M": ["wait", "gotoParent:root"],
+    "~": ["wait", "gotoParent:cwd"],
+
+    "yp": false,
+    "yn": false
+  }
+} 
