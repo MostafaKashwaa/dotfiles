@@ -1,8 +1,30 @@
+set nocompatible
+
 set encoding=utf-8
 set nobackup
 set nowritebackup
 set updatetime=1000
-"set signcolumn
+
+set number
+set smartindent
+set tabstop=2
+set expandtab
+set shiftwidth=2
+
+set cursorline
+
+set ignorecase
+set smartcase
+
+set showcmd
+set showmode
+
+set hlsearch
+
+set history=1000
+
+set path+=**
+set wildmenu
 
 filetype on
 filetype plugin on
@@ -34,6 +56,7 @@ else
   colorscheme default
 endif
 
+" Coc extensions 
 let g:coc_global_extensions = [
   \ 'coc-yaml',
   \ 'coc-pyright',
@@ -45,30 +68,14 @@ let g:coc_global_extensions = [
   \ 'coc-explorer'
   \ ]
 
-" let g:coc_filetype_map = {
-"   \ 'python': ['coc-pyright'],
-"   \ 'javascript': ['coc-tsserver'],
-"   \ 'typescript': ['coc-tsserver'],
-"   \ 'go': ['coc-go'],
-"   \ 'java': ['coc-java'],
-"   \ }
-
 let g:coc_disable_startup_warning = 1
 set cmdheight=2
 
 set guioptions-=r
 set guioptions-=L
 set scrolloff=5
-"set smoothscrolL
-"nnoremap <ScrollWheelUp> k
-"nnoremap <ScrollWheelDown> j
 
-" hi CocFloating ctermbg=0
-" hi CocFloating ctermfg=242
-" hi CocInlayHint ctermfg=166
-" hi CocInlayHint ctermbg=88
-
-" hi CocFloating ctermbg=236 ctermfg=231 guibg=#282a36 guifg=#f8f8f2
+" Coc appearance {{{
 hi CocFloating ctermbg=236 ctermfg=231 guibg=#232530 guifg=#f8f8f2
 hi cocmenusel ctermbg=61 ctermfg=231 guibg=#bd93f9 guifg=#f8f8f2
 hi CocFloating guisp=#44475a gui=standout
@@ -77,20 +84,28 @@ if has('gui_running')
   hi CocFloating gui=shadow:2,sharp
 endif
 
-"hi cocinlayhint gui=italic cterm=italic ctermbg=235 ctermfg=245 guibg=#44475a guifg=#6272a4
 hi cocinlayhinttype gui=italic cterm=italic ctermbg=235 ctermfg=117 guibg=#44475a guifg=#8be9fd
 hi CocInlayHintParameter gui=italic cterm=italic ctermbg=235 ctermfg=215 guibg=#44475a guifg=#ffb86c
-" 
+ 
 hi CocErrorHighlight ctermfg=203 guifg=#ff5555
 hi CocWarningHighlight ctermfg=215 guifg=#ffb86c
 hi CocInfoHighlight ctermfg=117 guifg=#8be9fd
+" }}}
  
-" autocmd FileType * call matchadd('CocInlayHint', '^\s*.\{-}\ze\s*[;,]', 0, -1)
+" MAPPINGS -------------------------------------------------- {{{
+inoremap jj <ESC>
+nnoremap ,o o<ESC>
+nnoremap ,O O<ESC>
+nnoremap Y y$
+nnoremap <c-d> :bot term<CR>
 
-
+" Coc mappings {{{
+" Use <Tab> to move down in coc menus and <S-Tab> to move up
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) : CheckBackSpace() ? "\<Tab>" : coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<c-h>"
 inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use Return to confirm selected choice in coc menus
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
 " Use <c-space> to trigger completion
@@ -100,6 +115,7 @@ else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
 
+" Code navigation.
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
@@ -108,15 +124,21 @@ nmap <silent> gD <Plug>(coc-declaration)
 nmap <silent> K :call CocActionAsync('doHover')<CR>
 " Go Back
 nmap <silent> gb <C-o> 
+" trigger code actions
 nmap <silent> ,ca <Plug>(coc-codeaction)
 
+" Use ctrl with j, and k to move in the coc menu down and up, f, and b to move
+" page down and up while in insert mode.
 inoremap <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<Down>"
 inoremap <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<Up>"
 inoremap <expr> <C-f> coc#pum#visible() ? "\<PageDown>" : "\<Right>"
 inoremap <expr> <C-b> coc#pum#visible() ? "\<PageUp>" : "\<Left>"
 
+" Use ctrl with j, and k to navigate the coc menu in normal mode.
 nnoremap <silent><nowait><expr> <C-j> coc#float#has_scroll() ? coc#float#scroll(1, 1) : "\<C-j>" 
 nnoremap <silent><nowait><expr> <C-k> coc#float#has_scroll() ? coc#float#scroll(0, 1) : "\<C-k>" 
+
+" Use alt with j, and k to scroll documentation popups in insert mode.
 execute "set <A-h>=\eh"
 execute "set <A-j>=\ej"
 execute "set <A-k>=\ek"
@@ -124,58 +146,29 @@ execute "set <A-l>=\el"
 inoremap <silent><nowait><expr> <A-j> coc#float#has_scroll() ? coc#float#scroll(1, 1) : "\<A-j>" 
 inoremap <silent><nowait><expr> <A-k> coc#float#has_scroll() ? coc#float#scroll(0, 1) : "\<A-k>" 
 
-nnoremap <silent> <space>e :CocCommand explorer<CR>
-" Highlight the symbol and its references when holding the cursor
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
 "Renaming
 nmap ,rn <Plug>(coc-rename)
 
 xmap ,f <Plug>(coc-format-selected)
 nmap ,f <Plug>(coc-format-selected)
 
-function! CheckBackSpace() abort
-  let col=col('.') - 1
-  return !col || getline('.')[col - 1] =~# '\s'
-endfunction
+" }}}
 
-
-set number
-set smartindent
-set tabstop=2
-set expandtab
-set shiftwidth=2
-
-set cursorline
-
-set ignorecase
-set smartcase
-
-set showcmd
-set showmode
-
-set hlsearch
-
-set history=1000
-
-set path+=**
-set wildmenu
-" set wildmenu=list:longest
-
-" MAPPINGS -------------------------------------------------- {{{
-
-inoremap jj <ESC>
-nnoremap ,o o<ESC>
-nnoremap ,O O<ESC>
-nnoremap Y y$
-nnoremap <c-d> :bot term<CR>
+nnoremap <silent> <space>e :CocCommand explorer<CR>
 
 " }}}
 
+" Highlight the symbol and its references when holding the cursor
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+
 autocmd FileType java nnoremap <expr> cc getline(".") =~ '\s*\/\/' ? '^2x' : 'I//<ESC>'
+autocmd FileType c nnoremap <expr> cc getline(".") =~ '\s*\/\/' ? '^2xj' : 'I//<ESC>j'
 autocmd FileType python nnoremap <expr> cc getline(".") =~ '\s*# ' ? '^2x' : 'I# <ESC>'
 autocmd FileType bash nnoremap <expr> cc getline(".") =~ '\s*# ' ? '^2x' : 'I# <ESC>'
+autocmd FileType vim setlocal foldmethod=marker
 
+" Flutter coc {{{
 augroup flutter_coc
   autocmd!
   autocmd FileType dart nnoremap <silent> ,fr :call CocAction('runCommand', 'flutter.dev.hotReload')<CR>
@@ -189,11 +182,13 @@ augroup flutter_coc
   autocmd FileType dart nnoremap <silent> ,fs :call FlutterSelectDevice()<CR>
 augroup END
 
+" Copy file path and file name to vim register instead of the clipboard. for
+" unsupported clipboard.
 autocmd BufEnter * echo 'FileType: [' . &ft . ']'
 nnoremap yp :if &ft ==# 'coc-explorer' \| call CopyFilePath() \| else \| echo '' \| endif<CR>
 nnoremap yn :if &ft ==# 'coc-explorer' \| call CopyFileName() \| else \| echo '' \| endif<CR>
 
-
+" Flutter functions
 function! FlutterSelectDevice()
   "Get device list
   let devices_output = system('flutter devices --machine')
@@ -288,7 +283,6 @@ function! PopupFilter(winid, key)
 endfunction
 
 function! FlutterRun()
-  " let devices = CocAction('runCommand', 'flutter.devices', 1)
   let devices_output = system('flutter devices --machine')
 
   if empty(devices_output)
@@ -320,14 +314,7 @@ function! FlutterRun()
     return
   endif
 
-  "let device_id = split(choices[selection-1], ' ')[-1]
-  "let device_id = substitute(device_id, '[()]', '', 'g')
-
   let device_id = devices[selection-1]['id']
-  "echo "devices list: " . devices_output 
-  echo "device id before substitute: " . device_id
-  "let device_id = substitute(device_id, '^[''"]\+', '', '')
-  "let device_id = substitute(device_id, '[''"]\$', '', '')
 
   execute 'CocCommand flutter.run -d ' . device_id
   echo "device id: " . shellescape(device_id)
@@ -417,10 +404,9 @@ function! s:GetDeviceIcon(device)
   return emoji_icon . ' '
 endfunction
 
-" command! -nargs=0 FlutterRun call FlutterRun()
+" }}}
 
-" file-explorer functions
-
+" file-explorer functions {{{
 function! CopyFilePath() abort
   let node = CocAction('runCommand', 'explorer.getNodeInfo', 0)
   if !empty(node)
@@ -440,88 +426,10 @@ function! CopyFileName() abort
     echo 'Copied: ' . name
   endif
 endfunction
+" }}}
 
-" Show scroll mode in statusline
-" function! ScrollIndicator() abort
-"   try
-"     if get(g:, 'coc_service_initialized', 0)
-"       if coc#pum#visible() | return '[PUM]' | endif
-"       if coc#float#scroll() | return '[DOC]' | endif
-"     endif
-"   catch
-"   endtry
-"   return ''
-" endfunction
-" 
-" set statusline+=%{ScrollIndicator()}
+function! CheckBackSpace() abort
+  let col=col('.') - 1
+  return !col || getline('.')[col - 1] =~# '\s'
+endfunction
 
-
-" let g:coc_scroll_mode = ''
-
-" function! s:update_coc_scroll_mode() abort
-"   try 
-"     if !exists('g:coc_service_initialized') || !g:coc_service_initialized
-"       return
-"     endif
-"     let mode = ''
-"     if coc#pum#visible()
-"       let mode = '[PUM]'
-"     elseif coc#float#has_scroll()
-"       let mode = '[DOC]'
-"     else
-"       let mode = ''
-"     endif
-"     
-"     if g:coc_scroll_mode != mode
-"       let g:coc_scroll_mode = mode
-"       redrawstatus
-"     endif
-"   catch /E117/ 
-"   endtry
-"   return coc_scroll_mode
-" endfunction
-" 
-" set statusline+=%{s:update_coc_scroll_mode()}
-
-" function! ToggleComment()
-"    let pos=getpos(".")
-"    let win=winsaveview()
-"    if getline(".") =~ '\s*\/\/'
-"        normal! ^2x
-"        let pos[2]-=1
-"    else
-"        normal! ^i//
-"        let pos[2]+=3
-"    endif
-"    call winrestview(win)
-"    call setpos(".",pos)
-"    startinsert
-" endfunction
-" inoremap <c-c> <Esc>:call ToggleComment()<CR>
-
-" Configurations for Plugin 'christoomey/vim-tmux-navigator'
-" if exists('$TMUX')
-"   let g:tmux_navigator_no_mapping = 1
-"   nnoremap <silent> <A-h> :<C-U>TmuxNavigateLeft<cr>
-"   nnoremap <silent> <A-j> :<C-U>TmuxNavigateDown<cr>
-"   nnoremap <silent> <A-k> :<C-U>TmuxNavigateUp<cr>
-"   nnoremap <silent> <A-l> :<C-U>TmuxNavigateRight<cr>
-" endif
-" something {inside {inner praces} has been deleted}
-" execute(1);
-" execute(2);
-" execute(3);
-" execute(4);
-" execute(5);
-" execute(6);
-" execute(7);
-" execute(8);
-" execute(9);
-" execute(10);
-" execute(11);
-" execute(12);
-" execute(13);
-" execute(14);
-" execute(15);
-" execute(16);
-" execute(17);
