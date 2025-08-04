@@ -56,7 +56,7 @@ else
   colorscheme default
 endif
 
-" Coc extensions 
+" Coc Extensions 
 let g:coc_global_extensions = [
   \ 'coc-yaml',
   \ 'coc-pyright',
@@ -75,7 +75,7 @@ set guioptions-=r
 set guioptions-=L
 set scrolloff=5
 
-" Coc appearance {{{
+" Coc Appearance {{{
 hi CocFloating ctermbg=236 ctermfg=231 guibg=#232530 guifg=#f8f8f2
 hi cocmenusel ctermbg=61 ctermfg=231 guibg=#bd93f9 guifg=#f8f8f2
 hi CocFloating guisp=#44475a gui=standout
@@ -100,22 +100,22 @@ nnoremap Y y$
 nnoremap <c-d> :bot term<CR>
 
 " Coc mappings {{{
-" Use <Tab> to move down in coc menus and <S-Tab> to move up
+" Use <Tab> to move down in coc menus and <S-Tab> to move up.
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) : CheckBackSpace() ? "\<Tab>" : coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<c-h>"
 inoremap <silent><expr> <c-space> coc#refresh()
 
-" Use Return to confirm selected choice in coc menus
+" Use Return to confirm selected choice in coc menus.
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
-" Use <c-space> to trigger completion
+" Use <c-space> to trigger completion.
 if has('nvim')
   inoremap <silent><expr> <c-space> coc#refresh()
 else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
 
-" Code navigation.
+" Code navigation
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
@@ -124,21 +124,21 @@ nmap <silent> gD <Plug>(coc-declaration)
 nmap <silent> K :call CocActionAsync('doHover')<CR>
 " Go Back
 nmap <silent> gb <C-o> 
-" trigger code actions
+" trigger code actions.
 nmap <silent> ,ca <Plug>(coc-codeaction)
 
-" Use ctrl with j, and k to move in the coc menu down and up, f, and b to move
-" page down and up while in insert mode.
+" Use ctrl with j, and k to move in the coc menu down and up, f, and b to move 
+" page down and up while in insert mode
 inoremap <expr> <C-j> coc#pum#visible() ? coc#pum#next(1) : "\<Down>"
 inoremap <expr> <C-k> coc#pum#visible() ? coc#pum#prev(1) : "\<Up>"
 inoremap <expr> <C-f> coc#pum#visible() ? "\<PageDown>" : "\<Right>"
 inoremap <expr> <C-b> coc#pum#visible() ? "\<PageUp>" : "\<Left>"
 
-" Use ctrl with j, and k to navigate the coc menu in normal mode.
+" Use ctrl with j, and k to navigate the coc menu in normal mode
 nnoremap <silent><nowait><expr> <C-j> coc#float#has_scroll() ? coc#float#scroll(1, 1) : "\<C-j>" 
 nnoremap <silent><nowait><expr> <C-k> coc#float#has_scroll() ? coc#float#scroll(0, 1) : "\<C-k>" 
 
-" Use alt with j, and k to scroll documentation popups in insert mode.
+" Use alt with j, and k to scroll documentation popups in insert mode
 execute "set <A-h>=\eh"
 execute "set <A-j>=\ej"
 execute "set <A-k>=\ek"
@@ -146,7 +146,7 @@ execute "set <A-l>=\el"
 inoremap <silent><nowait><expr> <A-j> coc#float#has_scroll() ? coc#float#scroll(1, 1) : "\<A-j>" 
 inoremap <silent><nowait><expr> <A-k> coc#float#has_scroll() ? coc#float#scroll(0, 1) : "\<A-k>" 
 
-"Renaming
+"Renaming.
 nmap ,rn <Plug>(coc-rename)
 
 xmap ,f <Plug>(coc-format-selected)
@@ -158,7 +158,7 @@ nnoremap <silent> <space>e :CocCommand explorer<CR>
 
 " }}}
 
-" Highlight the symbol and its references when holding the cursor
+" Highlight the symbol and its references when holding the cursor.
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
 
@@ -183,7 +183,7 @@ augroup flutter_coc
 augroup END
 
 " Copy file path and file name to vim register instead of the clipboard. for
-" unsupported clipboard.
+" unsupported clipboard
 autocmd BufEnter * echo 'FileType: [' . &ft . ']'
 nnoremap yp :if &ft ==# 'coc-explorer' \| call CopyFilePath() \| else \| echo '' \| endif<CR>
 nnoremap yn :if &ft ==# 'coc-explorer' \| call CopyFileName() \| else \| echo '' \| endif<CR>
