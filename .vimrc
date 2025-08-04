@@ -3,9 +3,13 @@ set nocompatible
 set encoding=utf-8
 set nobackup
 set nowritebackup
-set updatetime=1000
+set updatetime=50
+set signcolumn=auto
+set colorcolumn=100
 
 set number
+set relativenumber
+
 set smartindent
 set tabstop=2
 set expandtab
@@ -25,6 +29,8 @@ set history=1000
 
 set path+=**
 set wildmenu
+" set wildmenu=list:longest
+" set guicursor=i:hor20-BlinkOn0
 
 filetype on
 filetype plugin on
@@ -42,6 +48,9 @@ call plug#begin('~/.vim/plugged') " Plugin directory
 
 Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': 'npm ci'} 
 Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'berdandy/ansiesc.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim', 
 
 call plug#end()
 
@@ -65,18 +74,39 @@ let g:coc_global_extensions = [
   \ 'coc-sh',
   \ 'coc-prettier',
   \ 'coc-flutter',
-  \ 'coc-explorer'
+  \ 'coc-explorer',
+  \ 'coc-clangd',
   \ ]
-
 let g:coc_disable_startup_warning = 1
 set cmdheight=2
 
 set guioptions-=r
 set guioptions-=L
-set scrolloff=5
+set scrolloff=8
+
+" MAPPINGS -------------------------------------------------- {{{
+
+let mapleader = "\<space>"
+inoremap jj <ESC>
+nnoremap <leader>o o<ESC>
+nnoremap <leader>O O<ESC>
+nnoremap Y y$
+nnoremap <c-d> :bot term<CR>
+
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '>-2<CR>gv=gv
+
+nnoremap <leader>pv :Ex<CR>
+nnoremap <leader>rec :browse oldfiles<CR>
+nnoremap <leader>ff :Files<CR>
+nnoremap <leader>gf :GFiles<CR>
+
+" }}}
+
 
 " Coc Appearance {{{
-hi CocFloating ctermbg=236 ctermfg=231 guibg=#232530 guifg=#f8f8f2
+
+" hi CocFloating ctermbg=236 ctermfg=231 guibg=#282a36 guifg=#f8f8f2
 hi cocmenusel ctermbg=61 ctermfg=231 guibg=#bd93f9 guifg=#f8f8f2
 hi CocFloating guisp=#44475a gui=standout
 if has('gui_running')
@@ -84,22 +114,19 @@ if has('gui_running')
   hi CocFloating gui=shadow:2,sharp
 endif
 
+"hi cocinlayhint gui=italic cterm=italic ctermbg=235 ctermfg=245 guibg=#44475a guifg=#6272a4
 hi cocinlayhinttype gui=italic cterm=italic ctermbg=235 ctermfg=117 guibg=#44475a guifg=#8be9fd
 hi CocInlayHintParameter gui=italic cterm=italic ctermbg=235 ctermfg=215 guibg=#44475a guifg=#ffb86c
- 
+
 hi CocErrorHighlight ctermfg=203 guifg=#ff5555
 hi CocWarningHighlight ctermfg=215 guifg=#ffb86c
 hi CocInfoHighlight ctermfg=117 guifg=#8be9fd
-" }}}
  
-" MAPPINGS -------------------------------------------------- {{{
-inoremap jj <ESC>
-nnoremap ,o o<ESC>
-nnoremap ,O O<ESC>
-nnoremap Y y$
-nnoremap <c-d> :bot term<CR>
+" autocmd FileType * call matchadd('CocInlayHint', '^\s*.\{-}\ze\s*[;,]', 0, -1)
+" }}}
 
 " Coc mappings {{{
+
 " Use <Tab> to move down in coc menus and <S-Tab> to move up.
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) : CheckBackSpace() ? "\<Tab>" : coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<c-h>"
@@ -126,6 +153,11 @@ nmap <silent> K :call CocActionAsync('doHover')<CR>
 nmap <silent> gb <C-o> 
 " trigger code actions.
 nmap <silent> ,ca <Plug>(coc-codeaction)
+nmap <silent> ,cr <Plug>(coc-refactor)
+nmap <silent> ,cc <Plug>(coc-toggle-comment)
+
+" show the hilight name of the word under the cursor
+noremap ,<C-g> :echo synIDattr(synID(line("."), col("."), 1), "name")<CR>
 
 " Use ctrl with j, and k to move in the coc menu down and up, f, and b to move 
 " page down and up while in insert mode
@@ -146,49 +178,61 @@ execute "set <A-l>=\el"
 inoremap <silent><nowait><expr> <A-j> coc#float#has_scroll() ? coc#float#scroll(1, 1) : "\<A-j>" 
 inoremap <silent><nowait><expr> <A-k> coc#float#has_scroll() ? coc#float#scroll(0, 1) : "\<A-k>" 
 
-"Renaming.
+nnoremap <silent> <space>e :CocCommand explorer<CR>
+
+" Highlight the symbol and its references when holding the cursor
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+"Renaming
 nmap ,rn <Plug>(coc-rename)
 
 xmap ,f <Plug>(coc-format-selected)
-nmap ,f <Plug>(coc-format-selected)
+nmap ,ff <Plug>(coc-format)
 
 " }}}
 
 nnoremap <silent> <space>e :CocCommand explorer<CR>
 
-" }}}
 
 " Highlight the symbol and its references when holding the cursor.
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
+function! CheckBackSpace() abort
+  let col=col('.') - 1
+  return !col || getline('.')[col - 1] =~# '\s'
+endfunction
+
 
 autocmd FileType java nnoremap <expr> cc getline(".") =~ '\s*\/\/' ? '^2x' : 'I//<ESC>'
-autocmd FileType c nnoremap <expr> cc getline(".") =~ '\s*\/\/' ? '^2xj' : 'I//<ESC>j'
 autocmd FileType python nnoremap <expr> cc getline(".") =~ '\s*# ' ? '^2x' : 'I# <ESC>'
 autocmd FileType bash nnoremap <expr> cc getline(".") =~ '\s*# ' ? '^2x' : 'I# <ESC>'
-autocmd FileType vim setlocal foldmethod=marker
+autocmd FileType vim setlocal foldmethod=marker 
 
-" Flutter coc {{{
 augroup flutter_coc
   autocmd!
-  autocmd FileType dart nnoremap <silent> ,fr :call CocAction('runCommand', 'flutter.dev.hotReload')<CR>
-  autocmd FileType dart nnoremap <silent> ,fR :call CocAction('runCommand', 'flutter.dev.hotRestart')<CR>
+  " autocmd FileType dart nnoremap <silent> ,fr :call CocAction('runCommand', 'flutter.dev.hotReload')<CR>
+  autocmd FileType dart nnoremap <silent> ,fr :call flutter#runner#hot_reload()<CR>
+  " autocmd FileType dart nnoremap <silent> ,fR :call CocAction('runCommand', 'flutter.dev.hotRestart')<CR>
+  autocmd FileType dart nnoremap <silent> ,fR :call flutter#runner#hot_restart()<CR>
   autocmd FileType dart nnoremap <silent> ,fd :call CocAction('runCommand', 'flutter.devices')<CR>
   autocmd FileType dart nnoremap <silent> ,fe :call CocAction('runCommand', 'flutter.emulators')<CR>
-  autocmd FileType dart nnoremap <silent> ,fq :call CocAction('runCommand', 'flutter.dev.quit')<CR>
+  "autocmd FileType dart nnoremap <silent> ,fq :call CocAction('runCommand', 'flutter.dev.quit')<CR>
+  autocmd FileType dart nnoremap <silent> ,fq :call flutter#runner#stop()<CR>
   autocmd FileType dart nnoremap <silent> ,fo :call CocAction('runCommand', 'flutter.dev.openDevToolsProfiler')<CR>
   autocmd FileType dart nnoremap <silent> ,fc :CocCommand flutter.run<CR>
   " autocmd FileType dart nnoremap <silent> ,fs :call FlutterRun()<CR>
   autocmd FileType dart nnoremap <silent> ,fs :call FlutterSelectDevice()<CR>
+  autocmd FileType dart nnoremap <silent> ,fl :call flutter#runner#toggle_logs()<CR>
 augroup END
+
+" autocmd BufEnter * echo 'FileType: [' . &ft . ']'
 
 " Copy file path and file name to vim register instead of the clipboard. for
 " unsupported clipboard
-autocmd BufEnter * echo 'FileType: [' . &ft . ']'
 nnoremap yp :if &ft ==# 'coc-explorer' \| call CopyFilePath() \| else \| echo '' \| endif<CR>
 nnoremap yn :if &ft ==# 'coc-explorer' \| call CopyFileName() \| else \| echo '' \| endif<CR>
 
-" Flutter functions
+" Flutter Functions {{{
 function! FlutterSelectDevice()
   "Get device list
   let devices_output = system('flutter devices --machine')
@@ -259,7 +303,8 @@ function! SelectDeviceAction(...)
   let device = g:flutter_devices[selection]
   call popup_close(a:1)
 
-  execute 'CocCommand flutter.run -d ' . device['id']
+  " execute 'CocCommand flutter.run -d ' . device['id']
+  call flutter#runner#start(device['id'])
 endfunction
 
 function! PopupFilter(winid, key)
@@ -282,7 +327,9 @@ function! PopupFilter(winid, key)
   return 0
 endfunction
 
+" native vim selection {{{
 function! FlutterRun()
+  " let devices = CocAction('runCommand', 'flutter.devices', 1)
   let devices_output = system('flutter devices --machine')
 
   if empty(devices_output)
@@ -314,18 +361,28 @@ function! FlutterRun()
     return
   endif
 
+  "let device_id = split(choices[selection-1], ' ')[-1]
+  "let device_id = substitute(device_id, '[()]', '', 'g')
+
   let device_id = devices[selection-1]['id']
+  "echo "devices list: " . devices_output 
+  "echo "device id before substitute: " . device_id
+  "let device_id = substitute(device_id, '^[''"]\+', '', '')
+  "let device_id = substitute(device_id, '[''"]\$', '', '')
 
   execute 'CocCommand flutter.run -d ' . device_id
   echo "device id: " . shellescape(device_id)
 endfunction
 
+"}}}
 
 if has('popupwin')
   hi pmenu guibg=#232530
   hi pmenuSel guibg=#44475a
 endif
+"}}}
 
+" Font tools {{{
 let s:device_icons = {
       \ 'android': '📱',
       \ 'ios': '',
@@ -347,6 +404,32 @@ let g:flutter_custom_icons = {
       \ 'ios': '🍎',
       \ 'default': '💻'
       \ }
+
+function! s:GetDeviceIcon(device)
+  if !exists('s:has_nerd_font')
+    let s:has_nerd_font = s:HasNerdFont()
+  endif
+  if s:has_nerd_font
+    let nerd_icons = {
+       \ 'android': '',
+       \ 'ios': '',
+       \ 'web': '',
+       \ 'linux': '',
+       \ 'windows': '',
+       \ 'macos': '',
+       \ 'chrome': '',
+       \ 'edge': '',
+       \ 'firefox': '',
+       \ 'safari': '',
+       \ 'default': ''
+      \ }
+    let icon = get(nerd_icons, tolower(a:device), nerd_icons['default'])
+    return icon . ' '
+  endif
+
+  let emoji_icon = get(s:device_icons, tolower(a:device), s:device_icons['default'])
+  return emoji_icon . ' '
+endfunction
 
 function! s:HasNerdFont()
   " Save current position
@@ -378,35 +461,10 @@ endfunction
 
 command! CheckNerdFont echo "Nerd Font supported: " . (s:HasNerdFont() ? "YES" : "NO")
 
-function! s:GetDeviceIcon(device)
-  if !exists('s:has_nerd_font')
-    let s:has_nerd_font = s:HasNerdFont()
-  endif
-  if s:has_nerd_font
-    let nerd_icons = {
-       \ 'android': '',
-       \ 'ios': '',
-       \ 'web': '',
-       \ 'linux': '',
-       \ 'windows': '',
-       \ 'macos': '',
-       \ 'chrome': '',
-       \ 'edge': '',
-       \ 'firefox': '',
-       \ 'safari': '',
-       \ 'default': ''
-      \ }
-    let icon = get(nerd_icons, tolower(a:device), nerd_icons['default'])
-    return icon . ' '
-  endif
-
-  let emoji_icon = get(s:device_icons, tolower(a:device), s:device_icons['default'])
-  return emoji_icon . ' '
-endfunction
-
 " }}}
 
 " file-explorer functions {{{
+
 function! CopyFilePath() abort
   let node = CocAction('runCommand', 'explorer.getNodeInfo', 0)
   if !empty(node)
@@ -426,10 +484,6 @@ function! CopyFileName() abort
     echo 'Copied: ' . name
   endif
 endfunction
-" }}}
 
-function! CheckBackSpace() abort
-  let col=col('.') - 1
-  return !col || getline('.')[col - 1] =~# '\s'
-endfunction
+" }}}
 
